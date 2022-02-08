@@ -1,7 +1,7 @@
 const client = require('./connection.js')
 const express = require('express');
-const { getEventListeners } = require('pg/lib/query');
 const app = express();
+
 
 app.listen(3200, ()=>{
     console.log("Sever is now listening at port 3200");
@@ -21,17 +21,20 @@ app.get('/users', (req, res)=>{
 })
 
 app.get('/users/:roll_no', (req, res)=>{
-    client.query(`Select * from users where roll_no=${req.params.roll_no}`, (err, result)=>{
+    const rollno= req.params.roll_no;
+    if(isNaN(rollno)==false)
+    {
+        client.query(`Select * from users where roll_no=${req.params.roll_no}`, (err, result)=>{
         if(!err){
             res.send(result.rows);
         }
     });
+    }
+    else
+    res.send('ERROR');   
     client.end;
 })
 
-app.get('*', (req, res) =>{
-    res.send('ERROR', 404);
-})
 
 app.post('/users', (req, res)=> {
     const user = req.body;
@@ -71,13 +74,19 @@ app.put('/users/:roll_no', (req, res)=> {
 })
 
 app.delete('/users/:roll_no', (req, res)=> {
-    const insertQuery = `delete from users where roll_no=${req.params.roll_no}`
+    const user = req.body;
+    const duplicat= client.query('SELECT TOP 1 user.roll_no FROM users WHERE users.roll_no= req.params.roll_no');
+    if(duplicat)
+   {const insertQuery = `delete from users where roll_no=${req.params.roll_no}`
     client.query(insertQuery, (err, result)=>{
         if(!err){
             res.send('Deletion was successful')
         }
         else{ console.log(err.message) }
-    })
+    })}
+    else
+    res.send('ERROR')
+    
     client.end;
 })
 
