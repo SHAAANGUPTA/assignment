@@ -75,8 +75,8 @@ app.put('/users/:roll_no', (req, res)=> {
 
 app.delete('/users/:roll_no', (req, res)=> {
     const user = req.body;
-    const duplicat= client.query('SELECT TOP 1 user.roll_no FROM users WHERE users.roll_no= req.params.roll_no');
-    if(duplicat)
+    const exists= client.query('SELECT COUNT(*) FROM users WHERE user.roll_no =eq.params.roll_no');
+    if(exists)
    {const insertQuery = `delete from users where roll_no=${req.params.roll_no}`
     client.query(insertQuery, (err, result)=>{
         if(!err){
